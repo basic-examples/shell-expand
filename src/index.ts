@@ -2,8 +2,11 @@ export function shellExpand(
   str: string,
   variables:
     | Partial<Record<string, string>>
-    | ((key: string) => string | undefined)
-): string {
+    | ((key: string) => string | undefined),
+  options: {
+    IFS?: string;
+  } = {}
+): string[] {
   const get = (key: string): string | undefined =>
     typeof variables === "function" ? variables(key) : variables[key];
 
@@ -24,7 +27,7 @@ export function shellExpand(
     tokens.push(str.slice(lastIndex)); // trailing literal
   }
 
-  return tokens
+  const expanded = tokens
     .map((part) => {
       // Expandable token
       if (part.startsWith("${") && part.endsWith("}")) {
@@ -106,4 +109,16 @@ export function shellExpand(
       return part; // fallback
     })
     .join("");
+
+  const fallbackIFS =
+    options.IFS ??
+    (typeof variables === "object" && variables !== null
+      ? (variables as Record<string, string>)["IFS"]
+      : undefined) ??
+    " \t\n";
+
+  const escapeForCharClass = (s: string) =>
+    s.replace(/[-\\^$*+?.()|[\]{}]/g, "\\$&");
+  const splitter = new RegExp(`[${escapeForCharClass(fallbackIFS)}]+`);
+  return expanded.split(splitter).filter((v) => v !== "");
 }
