@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "name": "@this-project/test",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "npm install && tsx src"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.5",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "shell-expand": "file:../dist"
+  }
+}
